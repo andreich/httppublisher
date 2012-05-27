@@ -1,21 +1,22 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
  	<!-- nothing to configure -->
+ 	<j:set var="helpURL" value="/plugin/HttpPublisher" />
  	<f:section title="HTTP Publisher profiles">
 		<f:entry title="Profiles" description="Profiles for publishing to HTTP servers">
 			<f:repeatable var="profile" items="${descriptor.profiles}">
         		<table width="100%">
-          			<f:entry title="Profile name">
+          			<f:entry title="Profile name" help="${helpURL}/help-profile.html">
             			<f:textbox name="pth.name" value="${profile.name}" />
           			</f:entry>
           			
-          			<f:entry title="Server URL">
+          			<f:entry title="Server URL" help="${helpURL}/help-server.html">
           				<f:textbox name="pth.server" value="${profile.server}"
-          											 checkUrl="'${rootURL}/publisher/HttpPublisher/checkServer?url='+escape(this.value)" />
+          											 checkUrl="'${rootURL}/publisher/HttpPublisherPlugin/checkServer?url='+escape(this.value)" />
           			</f:entry>
           			
-          			<f:entry title="Failover URL">
+          			<f:entry title="Failover URL" help="${helpURL}/help-failover.html">
           				<f:textbox name="pth.failover" value="${profile.failover}"
-          											   checkUrl="'${rootURL}/publisher/HttpPublisher/checkServer?url='+escape(this.value)" />
+          											   checkUrl="'${rootURL}/publisher/HttpPublisherPlugin/checkServer?url='+escape(this.value)" />
           			</f:entry>
 	          	       
 					<f:entry title="">

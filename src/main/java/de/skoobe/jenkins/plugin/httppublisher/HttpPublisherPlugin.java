@@ -30,7 +30,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
-public class HttpPublisher extends Recorder implements Describable<Publisher> {
+public class HttpPublisherPlugin extends Recorder implements Describable<Publisher> {
 
 	private String profileName;
 	private final List<Entry> entries = new ArrayList<Entry>();
@@ -38,14 +38,17 @@ public class HttpPublisher extends Recorder implements Describable<Publisher> {
 	public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
 	@DataBoundConstructor
-	public HttpPublisher() {
+	public HttpPublisherPlugin() {
 		super();
 	}
 
-	public HttpPublisher(String profileName) {
+	public HttpPublisherPlugin(String profileName) {
 		super();
 		if (profileName == null) {
-			// @TODO: exactly like s3, take the first one
+			HttpPublisherProfile[] profiles = DESCRIPTOR.getProfiles();
+			if (profiles.length > 0) {
+				profileName = profiles[0].getName();
+			}
 		}
 		this.profileName = profileName;
 	}
@@ -69,14 +72,14 @@ public class HttpPublisher extends Recorder implements Describable<Publisher> {
 	protected void log(final PrintStream logger, final String message) {
 		logger.println(getDescriptor().getDisplayName() + " " + message);
 	}
-
-	public HTTPPublisherProfile getProfile() {
-		HTTPPublisherProfile[] profiles = DESCRIPTOR.getProfiles();
+	
+	public HttpPublisherProfile getProfile() {
+		HttpPublisherProfile[] profiles = DESCRIPTOR.getProfiles();
 		if (profileName == null && profiles.length > 0) {
 			return profiles[0];
 		}
 
-		for (final HTTPPublisherProfile profile : profiles) {
+		for (final HttpPublisherProfile profile : profiles) {
 			if (profile.getName().equals(profileName)) {
 				return profile;
 			}
@@ -93,7 +96,7 @@ public class HttpPublisher extends Recorder implements Describable<Publisher> {
 			return true;
 		}
 
-		HTTPPublisherProfile profile = getProfile();
+		HttpPublisherProfile profile = getProfile();
 		if (profile == null) {
 			log(listener.getLogger(), "No HTTP profile configured");
 			build.setResult(Result.UNSTABLE);
@@ -136,7 +139,7 @@ public class HttpPublisher extends Recorder implements Describable<Publisher> {
 	public static final class DescriptorImpl extends
 			BuildStepDescriptor<Publisher> {
 
-		private final CopyOnWriteList<HTTPPublisherProfile> profiles = new CopyOnWriteList<HTTPPublisherProfile>();
+		private final CopyOnWriteList<HttpPublisherProfile> profiles = new CopyOnWriteList<HttpPublisherProfile>();
 
 		public DescriptorImpl(Class<? extends Publisher> klass) {
 			super(klass);
@@ -144,12 +147,12 @@ public class HttpPublisher extends Recorder implements Describable<Publisher> {
 		}
 
 		public DescriptorImpl() {
-			this(HttpPublisher.class);
+			this(HttpPublisherPlugin.class);
 		}
 
-		public HttpPublisher newInstance(StaplerRequest req,
+		public HttpPublisherPlugin newInstance(StaplerRequest req,
 				net.sf.json.JSONObject formData) throws FormException {
-			HttpPublisher publisher = new HttpPublisher();
+			HttpPublisherPlugin publisher = new HttpPublisherPlugin();
 			req.bindParameters(publisher, "pth.");
 			publisher.getEntries().addAll(
 					req.bindParametersToList(Entry.class, "pth.entry."));
@@ -160,13 +163,13 @@ public class HttpPublisher extends Recorder implements Describable<Publisher> {
 		public boolean configure(StaplerRequest req, JSONObject json)
 				throws hudson.model.Descriptor.FormException {
 			profiles.replaceBy(req.bindParametersToList(
-					HTTPPublisherProfile.class, "pth."));
+					HttpPublisherProfile.class, "pth."));
 			save();
 			return true;
 		}
 
-		public HTTPPublisherProfile[] getProfiles() {
-			return profiles.toArray(new HTTPPublisherProfile[0]);
+		public HttpPublisherProfile[] getProfiles() {
+			return profiles.toArray(new HttpPublisherProfile[0]);
 		}
 
 		@Override

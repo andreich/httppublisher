@@ -17,18 +17,18 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class HTTPPublisherProfile {
+public class HttpPublisherProfile {
 
 	private String name;
 	private String server;
 	private String failover;
 	private PrintStream logger = null;
 
-	public HTTPPublisherProfile() {
+	public HttpPublisherProfile() {
 	}
 
 	@DataBoundConstructor
-	public HTTPPublisherProfile(String name, String server, String failover) {
+	public HttpPublisherProfile(String name, String server, String failover) {
 		this.name = name;
 		this.server = server;
 		this.failover = failover;
