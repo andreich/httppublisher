@@ -5,6 +5,7 @@ import hudson.FilePath;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,39 +18,47 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class HttpPublisherProfile {
-
+public class HttpPublisherProfile implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3407333590032467265L;
 	private String name;
-	private String server;
-	private String failover;
-	private PrintStream logger = null;
+	private List<Server> servers;
 
+	private transient PrintStream logger;
+	
+	
 	public HttpPublisherProfile() {
 	}
 
-	@DataBoundConstructor
-	public HttpPublisherProfile(String name, String server, String failover) {
+	public HttpPublisherProfile(String name, List<Server> servers) {
 		this.name = name;
-		this.server = server;
-		this.failover = failover;
+		this.servers = servers;
 	}
 
-	public void setServer(String server) {
-		this.server = server;
+	@DataBoundConstructor
+	public HttpPublisherProfile(String name, Server[] servers) {
+		this.name = name;
+		this.servers = new ArrayList<Server>();
+		for (final Server server : servers) {
+			this.servers.add(server);
+		}
 	}
-
-	public String getServer() {
-		return server;
+	
+	public void setLogger(PrintStream logger) {
+		this.logger = logger;
 	}
-
-	public void setFailover(String failover) {
-		this.failover = failover;
+	
+	public void setServers(List<Server> servers) {
+		this.servers = servers;
 	}
-
-	public String getFailover() {
-		return failover;
+	
+	public List<Server> getServers() {
+		return servers;
 	}
-
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -64,14 +73,10 @@ public class HttpPublisherProfile {
 
 	protected void log(String message) {
 		if (logger == null) {
-			System.out.println(message);
+			System.err.println(message);
 		} else {
 			logger.println(message);
 		}
-	}
-
-	public void setLogger(PrintStream logger) {
-		this.logger = logger;
 	}
 
 	public boolean upload(FilePath filePath) throws IOException,
@@ -83,21 +88,22 @@ public class HttpPublisherProfile {
 		log("uploading " + filePath);
 
 		File file = new File(filePath.toURI());
-
-		HttpClient client = new DefaultHttpClient();
+		return upload(file);
+	}
+	
+	public boolean upload(File file) {
 		HttpEntity fileEntity = new FileEntity(file);
-
-		List<String> servers = new ArrayList<String>();
-		servers.add(server);
-		if (failover != null && !failover.isEmpty()) {
-			servers.add(failover);
-		}
-
+		return upload(file.getName(), fileEntity);
+	}
+	
+	public boolean upload(String fileName, HttpEntity fileEntity) {
+		HttpClient client = new DefaultHttpClient();
+		
 		boolean success = false;
 
-		for (final String currentServer : servers) {
-			success = tryUpload(currentServer, client, filePath.getName(),
-					fileEntity);
+		for (final Server currentServer : servers) {
+			success = tryUpload(currentServer.getHostname(), client, fileName,
+					fileEntity, logger);
 			if (success)
 				break;
 		}
@@ -106,7 +112,7 @@ public class HttpPublisherProfile {
 	}
 
 	private boolean tryUpload(String currentServer, HttpClient client,
-			String fileName, HttpEntity fileEntity) {
+			String fileName, HttpEntity fileEntity, PrintStream logger) {
 		try {
 			HttpPut put = new HttpPut(currentServer + fileName);
 			put.setEntity(fileEntity);

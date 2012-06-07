@@ -6,19 +6,27 @@
 			<f:repeatable var="profile" items="${descriptor.profiles}">
         		<table width="100%">
           			<f:entry title="Profile name" help="${helpURL}/help-profile.html">
-            			<f:textbox name="pth.name" value="${profile.name}" />
+            			<f:textbox name="httppublisher.name" value="${profile.name}" />
           			</f:entry>
           			
-          			<f:entry title="Server URL" help="${helpURL}/help-server.html">
-          				<f:textbox name="pth.server" value="${profile.server}"
-          											 checkUrl="'${rootURL}/publisher/HttpPublisherPlugin/checkServer?url='+escape(this.value)" />
+          			<f:entry title="Server URLs">
+          			   <f:nested>
+          			       <f:repeatable var="servers" items="${profile.servers}">
+          			           <table width="100%">
+          			               <f:entry title="Server URL" help="${helpURL}/help-server.html">
+                                        <f:textbox name="httppublisher.servers.hostname" value="${servers.hostname}"
+                                                   checkUrl="'${rootURL}/publisher/HttpPublisherPlugin/checkServer?url='+escape(this.value)" />
+                                    </f:entry>
+                                    <f:entry title="">
+                                        <div align="right">
+                                            <f:repeatableDeleteButton />
+                                        </div>
+                                    </f:entry>
+          			           </table>
+          			       </f:repeatable>
+          			   </f:nested>
           			</f:entry>
-          			
-          			<f:entry title="Failover URL" help="${helpURL}/help-failover.html">
-          				<f:textbox name="pth.failover" value="${profile.failover}"
-          											   checkUrl="'${rootURL}/publisher/HttpPublisherPlugin/checkServer?url='+escape(this.value)" />
-          			</f:entry>
-	          	       
+          			   
 					<f:entry title="">
 						<div align="right">
 							<f:repeatableDeleteButton />
