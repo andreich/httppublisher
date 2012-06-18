@@ -10,8 +10,8 @@
           			</f:entry>
           			
           			<f:entry title="Server URLs">
-          			   <f:nested>
           			       <f:repeatable var="servers" items="${profile.servers}">
+          			       
           			           <table width="100%">
           			               <f:entry title="Server URL" help="${helpURL}/help-server.html">
                                         <f:textbox name="httppublisher.servers.hostname" value="${servers.hostname}"
@@ -23,8 +23,9 @@
                                         </div>
                                     </f:entry>
           			           </table>
+          			       
           			       </f:repeatable>
-          			   </f:nested>
+          			       
           			</f:entry>
           			   
 					<f:entry title="">

@@ -117,7 +117,7 @@ public class HttpPublisherProfile implements Serializable {
 			HttpPut put = new HttpPut(currentServer + fileName);
 			put.setEntity(fileEntity);
 			HttpResponse response = client.execute(put);
-			log(currentServer + " " + response.getStatusLine().toString());
+			log(currentServer + " " + response.getStatusLine().toString() + " (uploaded size: " +fileEntity.getContentLength() + ")");
 			if (response.getStatusLine().getStatusCode() / 100 == 2) {
 				return true;
 			}

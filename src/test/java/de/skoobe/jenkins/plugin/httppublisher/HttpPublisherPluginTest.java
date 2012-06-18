@@ -4,11 +4,12 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.jvnet.hudson.test.HudsonTestCase;
 
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
+
+import de.skoobe.jenkins.plugin.httppublisher.HttpPublisherPlugin.DescriptorImpl;
 
 public class HttpPublisherPluginTest extends HudsonTestCase {
 	
@@ -22,7 +23,6 @@ public class HttpPublisherPluginTest extends HudsonTestCase {
 		descriptor.getRawProfiles().replaceBy(new HttpPublisherProfile[] {});
 	}
 	
-	@Test
 	public void testBlankProjectConfiguration() throws Exception {
 		descriptor.configure(null, null);
 		assertEquals(0, descriptor.getRawProfiles().size());
@@ -30,7 +30,6 @@ public class HttpPublisherPluginTest extends HudsonTestCase {
 		assertEquals(0, descriptor.getRawProfiles().size());
 	}
 	
-	@Test
 	public void testSimpleProjectConfiguration() throws Exception {
 		String NAME = "testSPC";
 		String HOSTNAME = "http://localhost/";
@@ -49,7 +48,6 @@ public class HttpPublisherPluginTest extends HudsonTestCase {
 		assertEquals(HOSTNAME, parsedProfile.getServers().get(0).getHostname());
 	}
 	
-	@Test
 	public void testMoreComplexProjectConfiguration() throws Exception {
 		String NAME = "testSPC";
 		String HOSTNAME = "http://localhost/";
@@ -81,16 +79,15 @@ public class HttpPublisherPluginTest extends HudsonTestCase {
 			}
 		}
 	}
-	/*
-	@Test
-	public void testBlankConfigurationRoundTrip() throws Exception {
-		descriptor.getRawProfiles().replaceBy(new HttpPublisherProfile[] {});
-		submit(createWebClient().goTo("configure").getFormByName("config"));
-		assertEquals(0, descriptor.getRawProfiles().size());
-	}
 	
-	@Test
+	public void testBlankConfigurationRoundTrip() throws Exception {
+		assertEquals(0, HttpPublisherPlugin.DESCRIPTOR.getRawProfiles().size());
+		configRoundtrip();
+		assertEquals(0, HttpPublisherPlugin.DESCRIPTOR.getRawProfiles().size());
+	}
+
 	public void testSimpleConfigurationRoundTrip() throws Exception {
+		DescriptorImpl descriptor = HttpPublisherPlugin.DESCRIPTOR;
 		String HOSTNAME = "http://localhost/";
 		String NAME = "testSCRT";
 		Server[] servers = new Server[] { new Server(HOSTNAME) };
@@ -104,8 +101,8 @@ public class HttpPublisherPluginTest extends HudsonTestCase {
 		assertEquals(1, profile.getServers().size());
 		assertEquals(HOSTNAME, profile.getServers().get(0).getHostname());
 		HtmlForm form = wc.goTo("configure").getFormByName("config");
-		HtmlInput inputName = form.getInputByValue(NAME);
-		HtmlInput inputHostname = form.getInputByValue(HOSTNAME);
+		HtmlInput inputName = form.getInputByName("httppublisher.name");
+		HtmlInput inputHostname = form.getInputByName("httppublisher.servers.hostname");
 		inputName.setValueAttribute(NAME + " changed");
 		inputHostname.setValueAttribute(HOSTNAME + "changed/");
 		submit(form);
@@ -114,6 +111,6 @@ public class HttpPublisherPluginTest extends HudsonTestCase {
 		assertEquals(NAME + " changed", profile.getName());
 		assertEquals(1, profile.getServers().size());
 		assertEquals(HOSTNAME + "changed/", profile.getServers().get(0).getHostname());
-	}*/
+	}
 	
 }

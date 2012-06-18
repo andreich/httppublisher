@@ -35,6 +35,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+@SuppressWarnings("unchecked")
 public class HttpPublisherPlugin extends Recorder implements Describable<Publisher> {
 
 	private String profileName;
@@ -196,11 +197,23 @@ public class HttpPublisherPlugin extends Recorder implements Describable<Publish
 		}
 
 		private Server serverFromJSONObject(JSONObject json) {
+			if (json == null || json.isNullObject()) {
+				return null;
+			}
 			String hostname = json.getString("hostname");
 			return new Server(hostname);
 		}
 		
+		private <T> void addNotNull(List<T> list, T item) {
+			if (item != null) {
+				list.add(item);
+			}
+		}
+		
 		private HttpPublisherProfile fromJSONObject(JSONObject json) {
+			if (json == null || json.isNullObject()) {
+				return null;
+			}
 			String name = json.getString("name");
 			Object serversObj = json.get("servers");
 			List<Server> servers = new ArrayList<Server>();
@@ -208,11 +221,11 @@ public class HttpPublisherPlugin extends Recorder implements Describable<Publish
 				JSONArray array = json.getJSONArray("servers");
 				for (final Object serverObj : array) {
 					if (serverObj instanceof JSONObject) {
-						servers.add(serverFromJSONObject((JSONObject) serverObj));
+						addNotNull(servers, serverFromJSONObject((JSONObject)serverObj));
 					}
 				}
 			} else {
-				servers.add(serverFromJSONObject(json.getJSONObject("servers")));
+				addNotNull(servers, serverFromJSONObject(json.getJSONObject("servers")));
 			}
 			return new HttpPublisherProfile(name, servers);
 		}
@@ -220,22 +233,19 @@ public class HttpPublisherPlugin extends Recorder implements Describable<Publish
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject json)
 				throws hudson.model.Descriptor.FormException {
-			if (json == null || json.isNullObject()) {
-				profiles.replaceBy(new HttpPublisherProfile[] {});
-			} else {
+			List<HttpPublisherProfile> parsed = new ArrayList<HttpPublisherProfile>();
+			if (json != null && !json.isNullObject()) {
 				Object profileObj = json.get("profile");
 				if (profileObj instanceof JSONArray) {
 					JSONArray profileArray = json.getJSONArray("profile");
-					HttpPublisherProfile[] parsedProfiles = new HttpPublisherProfile[profileArray.size()]; 
 					for (int i = 0; i < profileArray.size(); i++) {
-						parsedProfiles[i] = fromJSONObject(profileArray.getJSONObject(i));
+						addNotNull(parsed, fromJSONObject(profileArray.getJSONObject(i)));
 					}
-					profiles.replaceBy(parsedProfiles);
 				} else {
-					HttpPublisherProfile profile = fromJSONObject(json.getJSONObject("profile"));
-					profiles.replaceBy(new HttpPublisherProfile[] { profile });
+					addNotNull(parsed, fromJSONObject(json.getJSONObject("profile")));
 				}
 			}
+			profiles.replaceBy(parsed);
 			save();
 			return true;
 		}
@@ -245,7 +255,7 @@ public class HttpPublisherPlugin extends Recorder implements Describable<Publish
 		}
 
 		@Override
-		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+		public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
 			return true;
 		}
 
