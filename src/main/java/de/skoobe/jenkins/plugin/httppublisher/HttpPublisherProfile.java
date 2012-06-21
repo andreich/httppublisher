@@ -16,6 +16,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class HttpPublisherProfile implements Serializable {
@@ -118,6 +119,7 @@ public class HttpPublisherProfile implements Serializable {
 			put.setEntity(fileEntity);
 			HttpResponse response = client.execute(put);
 			log(currentServer + " " + response.getStatusLine().toString() + " (uploaded size: " +fileEntity.getContentLength() + ")");
+			EntityUtils.consume(response.getEntity());
 			if (response.getStatusLine().getStatusCode() / 100 == 2) {
 				return true;
 			}
